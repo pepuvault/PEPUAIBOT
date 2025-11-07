@@ -62,6 +62,45 @@ class DataProcessor {
     };
   }
 
+  getManualKnowledgeEntries() {
+    // Add important information that might not be scraped well
+    const entries = [
+      {
+        url: 'https://pepuscan.com',
+        title: 'PepuScan - Pepe Unchained Block Explorer',
+        source: 'manual',
+        scrapedAt: new Date().toISOString(),
+        chunkIndex: 0,
+        totalChunks: 1,
+        content: 'PepuScan is the official block explorer for Pepe Unchained. You can use PepuScan (pepuscan.com) to view transactions, blocks, addresses, smart contracts, and all on-chain activity on the Pepe Unchained network. It works similar to Etherscan but for the Pepe Unchained Layer 2 blockchain. You can search for transaction hashes, wallet addresses, contract addresses, and block numbers to see detailed information about network activity.'
+      },
+      {
+        url: 'https://pepeunchained.com',
+        title: 'Pepe Unchained Key Information',
+        source: 'manual',
+        scrapedAt: new Date().toISOString(),
+        chunkIndex: 0,
+        totalChunks: 1,
+        content: 'Pepe Unchained is an EVM-compatible Layer 2 blockchain built on Ethereum. Key features: Very low gas fees compared to Ethereum mainnet, fast transaction speeds, supports all Ethereum tools and wallets like MetaMask. PEPU is the native token. The network has a DEX for trading, bridge functionality to move assets between Ethereum and Pepe Unchained, staking capabilities for PEPU tokens, and PepuScan block explorer for viewing on-chain data.'
+      },
+      {
+        url: 'https://pepeunchained.com',
+        title: 'Pump Pad - Launch Your Meme Coin',
+        source: 'manual',
+        scrapedAt: new Date().toISOString(),
+        chunkIndex: 0,
+        totalChunks: 1,
+        content: 'Pump Pad is a platform on Pepe Unchained that allows users to launch their own meme coins. It is part of the Pepe Unchained ecosystem and integrates with the Layer 2 blockchain infrastructure. Pump Pad enables creators to launch meme coins on the Pepe Unchained network, taking advantage of the low gas fees and fast transaction speeds. It is featured on the main Pepe Unchained website as one of the key products in the ecosystem.'
+      }
+    ];
+    
+    // Calculate contentLength
+    return entries.map(entry => ({
+      ...entry,
+      contentLength: entry.content.length
+    }));
+  }
+
   async processData() {
     console.log('='.repeat(60));
     console.log('Processing Scraped Data');
@@ -75,6 +114,11 @@ class DataProcessor {
     }
 
     const processedData = [];
+
+    // Add manual knowledge entries first (high priority)
+    const manualEntries = this.getManualKnowledgeEntries();
+    processedData.push(...manualEntries);
+    console.log(`Added ${manualEntries.length} manual knowledge entries`);
 
     for (const page of rawData) {
       const cleanedContent = this.cleanText(page.content);

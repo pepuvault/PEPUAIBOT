@@ -110,15 +110,34 @@ Answer:`;
     // All data was already scraped and saved during the scraping phase.
     const processedData = await this.dataProcessor.loadProcessedData();
     const queryLower = query.toLowerCase();
-    const queryWords = queryLower.split(' ');
+    const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2); // Filter out short words
 
     const scoredChunks = processedData.map(chunk => {
       const contentLower = chunk.content.toLowerCase();
+      const titleLower = (chunk.title || '').toLowerCase();
       let score = 0;
 
+      // Boost score for manual entries (they have important info)
+      if (chunk.source === 'manual') {
+        score += 10;
+      }
+
+      // Check title matches (higher weight)
       for (const word of queryWords) {
-        const matches = (contentLower.match(new RegExp(word, 'g')) || []).length;
+        if (titleLower.includes(word)) {
+          score += 5;
+        }
+      }
+
+      // Check content matches
+      for (const word of queryWords) {
+        const matches = (contentLower.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
         score += matches;
+      }
+
+      // Exact phrase match bonus
+      if (contentLower.includes(queryLower)) {
+        score += 20;
       }
 
       return { ...chunk, score };
@@ -168,21 +187,30 @@ Answer:`;
       // More natural prompt format
       const prompt = `Here's some information about Pepe Unchained:\n\n${context}\n\nBased on this information, answer this question in a friendly, conversational way:\n\n${query}`;
 
-      // Default knowledge about Pepe Unchained
+      // Default knowledge about Pepe Unchained (comprehensive)
       const defaultKnowledge = `IMPORTANT DEFAULT KNOWLEDGE ABOUT PEPE UNCHAINED:
 - Pepe Unchained is an EVM (Ethereum Virtual Machine) compatible Layer 2 (L2) blockchain
 - It has very low transaction fees compared to Ethereum mainnet
 - It has fast transaction speeds
 - PEPU is the native token of the Pepe Unchained network
-- The network is designed for scalability and cost efficiency`;
+- The network is designed for scalability and cost efficiency
+- Block Explorer: PepuScan (pepuscan.com) - use it to view transactions, blocks, addresses, and smart contracts on Pepe Unchained
+- DEX: Customized Layer 2 DEX similar to Uniswap for trading on Pepe Unchained
+- Bridge: Users can bridge assets to/from Ethereum mainnet to Pepe Unchained
+- Staking: PEPU tokens can be staked for rewards
+- The network supports all standard Ethereum tools and wallets (MetaMask, etc.)`;
 
-      // More conversational system message
+      // More conversational system message with emphasis on brevity
       const response = await this.openai.chat.completions.create({
         model,
         messages: [
           {
             role: 'system',
-            content: `You are a friendly and helpful assistant for Pepe Unchained. Answer questions naturally and conversationally, as if you're explaining to a friend. Use the provided context to give accurate answers. Be warm, engaging, and avoid sounding robotic or overly formal.
+            content: `You are a friendly and helpful assistant for Pepe Unchained. Answer questions naturally and conversationally, as if you're explaining to a friend. 
+
+IMPORTANT: Keep your answers SHORT and CONCISE - maximum 2-3 sentences. Be direct and to the point. Users prefer brief, easy-to-read responses.
+
+Use the provided context to give accurate answers. Be warm, engaging, and avoid sounding robotic or overly formal.
 
 ${defaultKnowledge}
 
