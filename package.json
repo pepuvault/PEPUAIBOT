@@ -1,0 +1,28 @@
+{
+  "name": "pepu-ai",
+  "version": "1.0.0",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js telegram",
+    "api": "node index.js api",
+    "telegram": "node index.js telegram"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Pepe Unchained AI Telegram Bot",
+  "dependencies": {
+    "axios": "^1.13.1",
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "openai": "^6.8.0",
+    "twitter-api-v2": "^1.27.0"
+  }
+}

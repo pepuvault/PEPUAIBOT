@@ -6,7 +6,9 @@ node_modules/
 
 # Data files
 data/
-*.json
+data/*.json
+!package.json
+!package-lock.json
 
 # Logs
 *.log
